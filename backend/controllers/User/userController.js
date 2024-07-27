@@ -9,7 +9,7 @@ const test = (req, res) => {
 
 
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
     const { username, email, password } = req.body;
     // Check if all required fields are provided
     if (!username || !email || !password) {
@@ -35,19 +35,22 @@ const register = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Register the User
-    const userRegistered = await User.create({ username, email, password: hashedPassword });
-
-    // Send the response
-    res.status(201).json({
-        status: 'success',
-        message: 'User Registered Successfully!',
-        user: {
-            id: userRegistered._id,
-            username: userRegistered.username,
-            email: userRegistered.email
-        }
-    });
+   try {
+     // Register the User
+     const userRegistered = await User.create({ username, email, password: hashedPassword });
+     // Send the response
+     res.status(201).json({
+         status: 'success',
+         message: 'User Registered Successfully!',
+         user: {
+             id: userRegistered._id,
+             username: userRegistered.username,
+             email: userRegistered.email
+         }
+     });
+   } catch (error) {
+    next(error)
+   }
 }
 
 module.exports = {test, register}
